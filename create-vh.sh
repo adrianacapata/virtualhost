@@ -17,6 +17,12 @@ if [ $CREATE == 'Y' ] || [ $CREATE == 'y' ]
     then
         DIRPATH="`pwd`"    
 
+    elif [ $ROOTDIR == 'n' ] || [ $ROOTDIR == 'N' ]
+    then
+        echo "Please enter full path of root project directory [/var/www/symfonyproject/public]"
+        read DIRPATH
+    fi
+
 cd /etc/apache2/sites-available
 
 echo -e "\e[92mNew configuration for virtual host ${DOMAIN} is available at etc/apache2/sites-available/${DOMAIN}.conf. Preview: \e[0m"
@@ -41,35 +47,6 @@ sudo tee -a "${DOMAIN}.conf" <<EOL
 </VirtualHost> 
 EOL
 
-elif [ $ROOTDIR == 'n' ] || [ $ROOTDIR == 'N' ]
-    then
-        echo "Please enter full path of root project directory [/var/www/symfonyproject/public]"
-        read DIRPATH
-        cd /etc/apache2/sites-available
-
-echo -e "\e[92mNew configuration for virtual host ${DOMAIN} is available at etc/apache2/sites-available/${DOMAIN}.conf. Preview: \e[0m"
-
-sudo tee -a "${DOMAIN}.conf" <<EOL
-<VirtualHost *:80>
-    ServerName ${DOMAIN}
-    ServerAdmin webmaster@localhost
-
-    Options +FollowSymlinks +Indexes
-
-    DocumentRoot ${DIRPATH}
-    <Directory "${DIRPATH}">
-        AllowOverride All
-        Order Deny,Allow
-        Deny from All
-        Allow from All
-    </Directory>
-
-    ErrorLog "/var/log/${DOMAIN}-error_log"
-    CustomLog "/var/log/${DOMAIN}-access_log" combined
-</VirtualHost> 
-EOL
-
-fi
 sudo a2ensite ${DOMAIN}.conf
 
 sudo systemctl reload apache2
